@@ -1,0 +1,39 @@
+﻿services:
+  mvcapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mvcapp
+    ports:
+      - "5000:8081"     # HTTP (внешний:внутренний)
+      #- "5001:8443"    # HTTPS (если нужно)
+    networks:
+      - app-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_Kestrel__Endpoints__Http__Url=http://+:8080
+
+  keycloaksso:
+    image: quay.io/keycloak/keycloak:24.0.1
+    container_name: keycloaksso
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+
+volumes:
+  keycloak_data:
+
+networks:
+  app-network:
+    driver: bridge
